@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Journal</title>
+    <style>
+        :root {
+            --past-date-color: #d3ebd9;
+            --current-date-color: rgba(255, 223, 0, 0.2);
+            --primary-color: #518c3b;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #E3E6EB;
+            color: #333;
+        }
+
+        .wrapper {
+            width: 90%;
+            margin: 0.5rem auto;
+            padding: 20px;
+        }
+
+        .countdown-section {
+            background-color: #E3E6EB;
+            padding: 1.5rem;
+            border-radius: 10px;
+
+            text-align: center;
+        }
+
+        .countdown-title {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .countdown-timer {
+            font-size: 2rem;
+            color: #09611e;
+            font-weight: bold;
+        }
+
+        .calendar-container {
+            background-color: #E3E6EB;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .calendar-section {
+            background-color: #FFFFFF;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+
+        .calendar-header {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .weekday-header {
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+            padding: 0.5rem;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border: 1px solid #eee;
+        }
+
+        .day:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        .day.past-date {
+            background-color: var(--past-date-color);
+        }
+
+        .day.current-date {
+            background-color: var(--current-date-color);
+        }
+
+        .day.has-entry::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+
+        /* Update the modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+            overflow-y: auto; /* Enable scrolling on the modal itself */
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: white;
+            width: 90%;
+            max-width: 600px;
+            margin: 50px auto;
+            margin-bottom: 50px; /* Add bottom margin */
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            animation: slideIn 0.3s ease;
+            max-height: 80vh; /* Maximum height relative to viewport */
+            overflow-y: auto; /* Enable scrolling within the content */
+        }
+
+        /* Style the scrollbar */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Ensure the header stays at the top */
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 1rem 0;
+            margin: -2rem -2rem 1rem -2rem;
+            padding: 2rem 2rem 1rem 2rem;
+            z-index: 1;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Style the entries list */
+        #entriesList {
+            margin-bottom: 2rem;
+        }
+
+        .entry-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        /* Ensure buttons stay visible */
+        .entry-controls {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 1rem 0;
+            margin: 1.5rem -2rem -2rem -2rem;
+            padding: 1rem 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-button {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover {
+            color: #333;
+        }
+
+        .entry-type-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .entry-type {
+            padding: 0.8rem;
+            text-align: center;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .entry-type:hover {
+            background-color: #e0e0e0;
+        }
+
+        .entry-type.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .entry-content {
+            margin-top: 1.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .entry-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        button.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .entry-item button {
+            padding: 8px 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .entry-item button:hover {
+            background-color: #45a049;
+        }
+
+        .entry-item audio {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button.primary:hover {
+            background-color: #1976d2;
+        }
+
+        button.secondary {
+            background-color: #9e9e9e;
+            color: white;
+        }
+
+        button.secondary:hover {
+            background-color: #757575;
+        }
+
+        .month-navigation {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 0.5 rem;
+            background-color: #F8F9FA;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+        .month-navigation-todayAndArrows {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .nav-button {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            color: darkgreen;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            transform: scale(1.1);
+            color: #1976d2;
+        }
+
+        .current-month-display {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        .export-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .export-button:hover {
+            background-color: #45a049;
+        }
+        .delete-button {
+            padding: 5px 10px;
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-button:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Countdown Section -->
+        <div class="countdown-section">
+            <div class="countdown-title">Time until June 4th, 2025</div>
+            <div class="countdown-timer" id="countdown"></div>
+        </div>
+        <div>
+
+            <div class="month-navigation">
+                <button class="nav-button" onclick="jumpToToday()" style="font-size: 1.3rem;font-weight: bold">
+                Today
+                </button>
+                <div class="month-navigation-todayAndArrows">
+                    <button class="nav-button" onclick="navigateMonth(-1)">◁</button>
+                    <div class="current-month-display" id="currentMonthDisplay"></div>
+                    <button class="nav-button" onclick="navigateMonth(1)">▶</button>
+                </div>
+
+        </div>
+        <!-- Calendar Container -->
+        <div class="calendar-container">
+            <div class="calendar-section">
+                <div class="calendar-header" id="previousMonthHeader"></div>
+                <div class="calendar" id="previousMonthCalendar"></div>
+            </div>
+            <div class="calendar-section">
+                <div class="calendar-header" id="currentMonthHeader"></div>
+                <div class="calendar" id="currentMonthCalendar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Entry Modal -->
+    <div id="entryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalDate"></h2>
+                <span class="close-button" onclick="closeModal()">&times;</span>
+            </div>
+
+            <!-- Existing Entries -->
+            <div id="existingEntries" class="entry-content" style="display: none;">
+                <div id="entriesList"></div>
+                <button class="primary" onclick="showNewEntryForm()" style="margin-top: 1rem;">
+                    Add New Entry
+                </button>
+                <!-- Change this line in your modal -->
+                <button class="primary" onclick="exportCurrentEntries()">
+                    Export Entries
+                </button>
+            </div>
+
+            <!-- New Entry Form -->
+            <div id="newEntryForm">
+                <div class="entry-type-selector">
+                    <div class="entry-type" onclick="selectEntryType('text')">Text</div>
+                    <div class="entry-type" onclick="selectEntryType('audio')">Audio</div>
+                    <div class="entry-type" onclick="selectEntryType('photo')">Photo</div>
+                </div>
+
+                <div id="textEntry" class="entry-input">
+                    <textarea placeholder="Write your thoughts here..."></textarea>
+                </div>
+
+                <div id="audioEntry" class="entry-input" style="display: none;">
+                    <button id="recordButton" class="secondary">Start Recording</button>
+                    <audio id="audioPlayer" controls style="display: none; margin-top: 1rem;"></audio>
+                </div>
+
+                <div id="photoEntry" class="entry-input" style="display: none;">
+                    <input type="file" accept="image/*" id="photoInput">
+                    <img id="imagePreview" style="max-width: 100%; margin-top: 1rem; display: none;">
+                </div>
+
+                <div class="entry-controls">
+                    <button class="secondary" onclick="closeModal()">Cancel</button>
+                    <button class="primary" onclick="saveEntry()">Save Entry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add this at the start of your JavaScript
+        const dbName = 'JournalDB';
+        const dbVersion = 1;
+        let db;
+
+        // Initialize IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(dbName, dbVersion);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('entries')) {
+                        db.createObjectStore('entries', { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+            });
+        }
+
+        // Save entry to IndexedDB
+        async function saveToIndexedDB(date, entry) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['entries'], 'readwrite');
+                const store = transaction.objectStore('entries');
+                const request = store.add({
+                    date: date,
+                    entry: entry,
+                    timestamp: new Date().toISOString()
+                });
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Get entries from IndexedDB
+        async function getFromIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['entries'], 'readonly');
+                const store = transaction.objectStore('entries');
+                const request = store.getAll();
+
+                request.onsuccess = () => {
+                    const entries = {};
+                    request.result.forEach(item => {
+                        if (!entries[item.date]) {
+                            entries[item.date] = [];
+                        }
+                        entries[item.date].push(item.entry);
+                    });
+                    resolve(entries);
+                };
+                request.onerror = () => reject(request.error);
+            });
+        }
+        // Calendar data
+        const calendar2025 = {
+            year: 2025,
+            months: [
+                { name: 'January', days: 31, startDay: 3 },
+                { name: 'February', days: 28, startDay: 6 },
+                { name: 'March', days: 31, startDay: 6 },
+                { name: 'April', days: 30, startDay: 2 },
+                { name: 'May', days: 31, startDay: 4 },
+                { name: 'June', days: 30, startDay: 0 },
+                { name: 'July', days: 31, startDay: 2 },
+                { name: 'August', days: 31, startDay: 5 },
+                { name: 'September', days: 30, startDay: 1 },
+                { name: 'October', days: 31, startDay: 3 },
+                { name: 'November', days: 30, startDay: 6 },
+                { name: 'December', days: 31, startDay: 1 }
+            ]
+        };
+
+        // Global variables
+        let entries = {};
+        let selectedDate = null;
+        let currentEntryType = 'text';
+        const targetDate = new Date('2025-06-04');
+        let currentViewMonth = new Date().getMonth(); // Current month being viewed
+        let currentViewYear = 2025;
+
+        // Load saved entries from localStorage
+        const savedEntries = localStorage.getItem('journalEntries');
+        if (savedEntries) {
+            entries = JSON.parse(savedEntries);
+        }
+
+        // Countdown timer function
+        function updateCountdown() {
+            const now = new Date();
+            const difference = targetDate - now;
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+
+            document.getElementById('countdown').textContent =
+                `${days} days, ${hours} hours, ${minutes} minutes`;
+        }
+
+        function navigateMonth(direction) {
+            currentViewMonth += direction;
+
+            if (currentViewMonth > 11) {
+                currentViewMonth = 0;
+                currentViewYear++;
+            } else if (currentViewMonth < 0) {
+                currentViewMonth = 11;
+                currentViewYear--;
+            }
+
+            generateCalendars();
+            updateMonthDisplay();
+        }
+
+        function updateMonthDisplay() {
+            const monthNames = calendar2025.months.map(m => m.name);
+            document.getElementById('currentMonthDisplay').textContent =
+                `${monthNames[currentViewMonth]} ${currentViewYear}`;
+        }
+                // Calendar generation functions
+        function generateCalendars() {
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth();
+
+            const previousMonth = currentViewMonth > 0 ? currentViewMonth - 1 : 11;
+            const previousYear = previousMonth === 11 ? currentViewYear - 1 : currentViewYear;
+
+            // Update headers
+            document.getElementById('previousMonthHeader').textContent =
+                    `${calendar2025.months[previousMonth].name} ${previousYear}`;
+            document.getElementById('currentMonthHeader').textContent =
+                    `${calendar2025.months[currentViewMonth].name} ${currentViewYear}`;
+
+            generateCalendarForMonth('previousMonthCalendar', calendar2025.months[previousMonth], previousMonth, previousYear);
+            generateCalendarForMonth('currentMonthCalendar', calendar2025.months[currentViewMonth], currentViewMonth, currentViewYear);
+        }
+
+        function generateCalendarForMonth(containerId, monthData, monthIndex, year) {
+            const calendar = document.getElementById(containerId);
+            calendar.innerHTML = '';
+            const currentDate = new Date();
+
+            // Add weekday headers
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            weekdays.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'weekday-header';
+                dayHeader.textContent = day;
+                calendar.appendChild(dayHeader);
+            });
+
+            // Add blank days
+            for (let i = 0; i < monthData.startDay; i++) {
+                const blankDay = document.createElement('div');
+                blankDay.className = 'day other-month';
+                calendar.appendChild(blankDay);
+            }
+
+            // Add days
+            for (let i = 1; i <= monthData.days; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day';
+
+                // Check if date is past or current
+                const checkDate = new Date(2025, monthIndex, i);
+                if (checkDate < currentDate) {
+                    dayElement.classList.add('past-date');
+                } else if (checkDate.toDateString() === currentDate.toDateString()) {
+                    dayElement.classList.add('current-date');
+                }
+
+                // Check for entries
+                const dateKey = `${year}-${monthData.name}-${i}`;
+                if (entries[dateKey] && entries[dateKey].length > 0) {
+                    dayElement.classList.add('has-entry');
+                }
+
+                dayElement.textContent = i;
+                dayElement.onclick = () => openEntryModal(i, monthData.name);
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        function openEntryModal(day, month, year) {
+            selectedDate = `${year}-${month}-${day}`;
+            document.getElementById('modalDate').textContent = `${month} ${day}, ${year}`;
+
+            if (entries[selectedDate] && entries[selectedDate].length > 0) {
+                showExistingEntries();
+            } else {
+                showNewEntryForm();
+            }
+
+            document.getElementById('entryModal').style.display = 'block';
+        }
+
+        function showExistingEntries() {
+            const entriesList = document.getElementById('entriesList');
+            entriesList.innerHTML = '';
+            const dateEntries = entries[selectedDate];
+
+            dateEntries.forEach((entry, index) => {
+                const entryElement = document.createElement('div');
+                entryElement.className = 'entry-item';
+                entryElement.style.marginBottom = '1rem';
+                entryElement.style.padding = '1rem';
+                entryElement.style.backgroundColor = '#f8f9fa';
+                entryElement.style.borderRadius = '8px';
+
+                // Add timestamp
+                const timestamp = new Date(entry.timestamp);
+                const timeElement = document.createElement('div');
+                timeElement.style.color = '#666';
+                timeElement.style.fontSize = '0.9rem';
+                timeElement.style.marginBottom = '0.5rem';
+                timeElement.textContent = timestamp.toLocaleTimeString();
+                entryElement.appendChild(timeElement);
+
+                // Add delete button
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '🗑️';
+                deleteButton.style.padding = '2px 8px';
+                deleteButton.style.backgroundColor = '#ff4444';
+                deleteButton.style.color = 'white';
+                deleteButton.style.border = 'none';
+                deleteButton.style.borderRadius = '4px';
+                deleteButton.style.cursor = 'pointer';
+                deleteButton.onclick = () => {
+                    if (confirm('Delete this entry?')) {
+                        entries[selectedDate].splice(index, 1);
+                        if (entries[selectedDate].length === 0) {
+                            delete entries[selectedDate];
+                        }
+                        localStorage.setItem('journalEntries', JSON.stringify(entries));
+                        showExistingEntries();
+                        generateCalendars();
+                    }
+                };
+                timeElement.appendChild(deleteButton);
+
+                // Add content based on type
+                switch(entry.type) {
+                    case 'text':
+                        const contentElement = document.createElement('div');
+                        contentElement.style.whiteSpace = 'pre-wrap';  // This preserves line breaks
+                        contentElement.textContent = entry.content;
+                        entryElement.appendChild(contentElement);
+                        break;
+                    case 'audio':
+                        // Create audio container
+                        const audioContainer = document.createElement('div');
+                        audioContainer.style.display = 'flex';
+                        audioContainer.style.flexDirection = 'column';
+                        audioContainer.style.gap = '10px';
+
+                        // Add audio player
+                        const audio = document.createElement('audio');
+                        audio.controls = true;
+                        if (entry.content.startsWith('data:audio')) {
+                            audio.src = entry.content;
+                        } else {
+                            audio.src = entry.content;
+                        }
+                        audioContainer.appendChild(audio);
+
+                        // Add download button
+                        const downloadButton = document.createElement('button');
+                        downloadButton.textContent = 'Download Audio';
+                        downloadButton.className = 'secondary';
+                        downloadButton.style.width = 'fit-content';
+                        downloadButton.onclick = () => {
+                            const link = document.createElement('a');
+                            link.href = entry.content;
+                            link.download = `audio_${selectedDate}_${index}.webm`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        };
+                        audioContainer.appendChild(downloadButton);
+
+                        entryElement.appendChild(audioContainer);
+                        break;
+                    case 'photo':
+                        const img = document.createElement('img');
+                        img.src = entry.content;
+                        img.style.maxWidth = '100%';
+                        entryElement.appendChild(img);
+                        break;
+                }
+
+                entriesList.appendChild(entryElement);
+            });
+
+            document.getElementById('existingEntries').style.display = 'block';
+            document.getElementById('newEntryForm').style.display = 'none';
+        }
+        function showNewEntryForm() {
+            document.getElementById('existingEntries').style.display = 'none';
+            document.getElementById('newEntryForm').style.display = 'block';
+            selectEntryType('text');
+            clearEntryForm();
+        }
+
+        function selectEntryType(type) {
+            currentEntryType = type;
+            document.querySelectorAll('.entry-type').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.entry-input').forEach(el => el.style.display = 'none');
+
+            event.target.classList.add('active');
+            document.getElementById(`${type}Entry`).style.display = 'block';
+        }
+
+        async function saveEntry() {
+            if (!selectedDate) {
+                alert('Please select a date first');
+                return;
+            }
+
+            const content = getEntryContent();
+            if (!content) {
+                alert('Please add some content to your entry');
+                return;
+            }
+
+            const newEntry = {
+                type: currentEntryType,
+                content: content,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                // Save to IndexedDB
+                await saveToIndexedDB(selectedDate, newEntry);
+
+                // Update local entries object
+                if (!entries[selectedDate]) {
+                    entries[selectedDate] = [];
+                }
+                entries[selectedDate].push(newEntry);
+
+                // Also save to localStorage as backup
+                localStorage.setItem('journalEntries', JSON.stringify(entries));
+
+                // Only after successful save, update UI
+                try {
+                    generateCalendars();
+                } catch (calendarError) {
+                    console.error('Error updating calendars:', calendarError);
+                    // Don't alert here, as the save was successful
+                }
+
+                closeModal();
+                
+
+            } catch (error) {
+                console.error('Error saving entry:', error);
+                alert('Error saving entry. Please try again.');
+            }
+        }
+
+
+        function getEntryContent() {
+            switch(currentEntryType) {
+                case 'text':
+                    return document.querySelector('textarea').value;
+                case 'audio':
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    return audioPlayer.dataset.audioData || audioPlayer.src;
+                case 'photo':
+                    return document.getElementById('imagePreview').src;
+                default:
+                    return '';
+            }
+        }
+
+        function clearEntryForm() {
+            document.querySelector('textarea').value = '';
+            document.getElementById('audioPlayer').src = '';
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('audioPlayer').style.display = 'none';
+            document.getElementById('imagePreview').style.display = 'none';
+        }
+
+        function closeModal() {
+            document.getElementById('entryModal').style.display = 'none';
+            clearEntryForm();
+        }
+
+        // Handle file input for photos
+        document.querySelector('#photoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle audio recording
+        // Handle audio recording with better format handling
+        recordButton.onclick = async () => {
+            if (recordButton.textContent === 'Start Recording') {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            sampleRate: 44100
+                        }
+                    });
+
+                    mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: 'audio/webm;codecs=opus'
+                    });
+
+                    mediaRecorder.ondataavailable = (e) => {
+                        audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
+
+                        // Convert to base64 and store
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = function() {
+                            const base64Audio = reader.result;
+                            const audioPlayer = document.getElementById('audioPlayer');
+                            audioPlayer.src = URL.createObjectURL(audioBlob);
+                            audioPlayer.style.display = 'block';
+                            audioPlayer.dataset.audioData = base64Audio;
+                        };
+                    };
+
+                    audioChunks = [];
+                    mediaRecorder.start();
+                    recordButton.textContent = 'Stop Recording';
+                } catch (err) {
+                    alert('Error accessing microphone: ' + err.message);
+                }
+            } else {
+                mediaRecorder.stop();
+                recordButton.textContent = 'Start Recording';
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+        };
+        function jumpToToday() {
+            const today = new Date();
+            currentViewMonth = today.getMonth();
+            currentViewYear = today.getFullYear();
+            generateCalendars();
+            updateMonthDisplay();
+        };
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('entryModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Initialize IndexedDB
+                await initDB();
+
+                // Load entries from IndexedDB
+                entries = await getFromIndexedDB();
+
+                // Initialize UI
+                generateCalendars();
+                updateMonthDisplay();
+                updateCountdown();
+                setInterval(updateCountdown, 60000);
+
+                // Add export button listener
+                const exportButton = document.getElementById('exportButton');
+                if (exportButton) {
+                    exportButton.addEventListener('click', exportEntries);
+                }
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                alert('Error loading saved entries. Please refresh the page.');
+            }
+        });
+
+        function exportCurrentEntries() {
+            console.log('Export function called');
+
+            if (!entries[selectedDate]) {
+                alert('No entries to export for this date.');
+                return;
+            }
+
+            // Create text file content
+            let textContent = `Journal Entries for ${selectedDate}\n\n`;
+
+            // Process each entry
+            entries[selectedDate].forEach(async (entry, index) => {
+                const timestamp = new Date(entry.timestamp);
+                textContent += `Entry ${index + 1} - ${timestamp.toLocaleString()}\n`;
+                textContent += `Type: ${entry.type}\n`;
+
+                switch(entry.type) {
+                    case 'text':
+                        textContent += `Content: ${entry.content}\n`;
+                        break;
+
+                    case 'audio':
+                        textContent += '[Audio Entry]\n';
+                        if (entry.content) {
+                            try {
+                                // Handle base64 audio data
+                                if (entry.content.startsWith('data:audio')) {
+                                    const binaryData = atob(entry.content.split(',')[1]);
+                                    const array = new Uint8Array(binaryData.length);
+                                    for (let i = 0; i < binaryData.length; i++) {
+                                        array[i] = binaryData.charCodeAt(i);
+                                    }
+                                    const audioBlob = new Blob([array], { type: 'audio/webm' });
+                                    const audioUrl = URL.createObjectURL(audioBlob);
+
+                                    const link = document.createElement('a');
+                                    link.href = audioUrl;
+                                    link.download = `audio_${selectedDate}_${index}.webm`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    URL.revokeObjectURL(audioUrl);
+                                }
+                            } catch (error) {
+                                console.error('Error exporting audio:', error);
+                                textContent += `[Error exporting audio file: ${error.message}]\n`;
+                            }
+                        }
+                        break;
+
+                    case 'photo':
+                        textContent += '[Photo Entry]\n';
+                        if (entry.content) {
+                            try {
+                                // Handle base64 image data
+                                if (entry.content.startsWith('data:image')) {
+                                    const link = document.createElement('a');
+                                    link.href = entry.content;
+                                    link.download = `image_${selectedDate}_${index}.png`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                }
+                            } catch (error) {
+                                console.error('Error exporting image:', error);
+                                textContent += `[Error exporting image file: ${error.message}]\n`;
+                            }
+                        }
+                        break;
+                }
+                textContent += '\n-------------------\n\n';
+            });
+
+            // Download text file
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `journal_entries_${selectedDate}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            alert('Export complete! Check your downloads folder.');
+        }
+        // Add this function to create periodic backups
+        function createBackup() {
+            const backup = {
+                entries: entries,
+                timestamp: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `journal_backup_${new Date().toISOString()}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Add a backup button to your UI
+        const backupButton = document.createElement('button');
+        backupButton.textContent = 'Backup Journal';
+        backupButton.onclick = createBackup;
+        document.querySelector('.countdown-section').appendChild(backupButton);
+    </script>
+</body>
+</html>
