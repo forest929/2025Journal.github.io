@@ -403,6 +403,9 @@
                 </div>
 
         </div>
+        <input type="file" id="backupFileInput" accept=".json">
+        <button onclick="restoreBackup()">Restore Backup</button>
+
         <!-- Calendar Container -->
         <div class="calendar-container">
             <div class="calendar-section">
@@ -1077,6 +1080,7 @@
         backupButton.textContent = 'Backup Journal';
         backupButton.onclick = createBackup;
         document.querySelector('.countdown-section').appendChild(backupButton);
+        
     </script>
 </body>
 </html>
