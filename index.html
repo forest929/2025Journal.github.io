@@ -1080,7 +1080,37 @@
         backupButton.textContent = 'Backup Journal';
         backupButton.onclick = createBackup;
         document.querySelector('.countdown-section').appendChild(backupButton);
+        function restoreBackup() {
+            const fileInput = document.getElementById('backupFileInput');
+            
+            if (fileInput.files.length === 0) {
+                alert('Please select a backup file first.');
+                return;
+            }
         
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+        
+            reader.onload = function (event) {
+                try {
+                    const backupData = JSON.parse(event.target.result);
+        
+                    if (!backupData.entries) {
+                        throw new Error("Invalid backup format.");
+                    }
+        
+                    // Save the restored entries to localStorage
+                    localStorage.setItem('journalEntries', JSON.stringify(backupData.entries));
+        
+                    alert('Backup restored successfully! Refresh the page to see the changes.');
+                } catch (error) {
+                    alert('Error restoring backup: ' + error.message);
+                }
+            };
+        
+            reader.readAsText(file);
+        }
+
     </script>
 </body>
 </html>
